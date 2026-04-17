@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Plus, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { mockEntries } from "@/lib/mock-data";
+import { useEntries } from "@/hooks/use-entries";
 
 const moodClass = (score: number) => {
   if (score > 0.2) return "mood-positive";
@@ -25,6 +25,10 @@ const moodColor = (score: number) => {
 };
 
 const JournalPage = () => {
+  const { entries, loading } = useEntries();
+
+  if (loading) return <div className="p-8 font-mono text-sm text-muted-foreground">Loading journal...</div>;
+
   return (
     <div className="p-8 max-w-4xl">
       <motion.div
@@ -46,7 +50,7 @@ const JournalPage = () => {
         </div>
 
         <div className="space-y-3">
-          {mockEntries.map((entry, i) => (
+          {entries.map((entry, i) => (
             <motion.div
               key={entry.id}
               initial={{ opacity: 0, y: 15 }}

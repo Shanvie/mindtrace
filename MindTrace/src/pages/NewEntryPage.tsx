@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Save, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useEntries } from "@/hooks/use-entries";
 
 const mockAnalyze = (text: string) => {
   const words = text.trim().split(/\s+/).filter(Boolean).length;
@@ -34,10 +36,12 @@ const moodBg = (score: number) => {
 };
 
 const NewEntryPage = () => {
+  const navigate = useNavigate();
   const [text, setText] = useState("");
   const [analysis, setAnalysis] = useState<ReturnType<typeof mockAnalyze> | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const { toast } = useToast();
+  const { addEntry } = useEntries();
 
   const runAnalysis = useCallback((value: string) => {
     if (value.trim().split(/\s+/).filter(Boolean).length < 5) {
@@ -57,7 +61,28 @@ const NewEntryPage = () => {
   }, [text, runAnalysis]);
 
   const handleSave = () => {
+    if (!analysis || text.trim().length < 10) {
+      toast({ 
+        title: "Entry too short", 
+        description: "Please write a bit more before saving.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    addEntry({
+      preview: text.substring(0, 150) + (text.length > 150 ? "..." : ""),
+      moodScore: analysis.moodScore,
+      arousal: analysis.arousal,
+      dominantEmotion: analysis.dominantEmotion,
+      emotions: analysis.emotions,
+      wordCount: analysis.wordCount,
+      burnoutFlag: analysis.moodScore < -0.4 && analysis.arousal > 0.6,
+      crisisFlag: false,
+    });
+
     toast({ title: "Entry saved", description: "Your journal entry has been recorded." });
+    navigate("/journal");
   };
 
   return (

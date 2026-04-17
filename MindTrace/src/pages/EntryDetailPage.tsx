@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Clock, AlertTriangle } from "lucide-react";
-import { mockEntries } from "@/lib/mock-data";
+import { useEntries } from "@/hooks/use-entries";
 
 const moodColor = (score: number) => {
   if (score > 0.2) return "text-warm";
@@ -17,7 +17,20 @@ const moodBg = (score: number) => {
 
 const EntryDetailPage = () => {
   const { id } = useParams();
-  const entry = mockEntries.find((e) => e.id === id) || mockEntries[0];
+  const { getEntryById, loading } = useEntries();
+  
+  if (loading) return <div className="p-8 font-mono text-sm text-muted-foreground">Loading entry...</div>;
+  
+  const entry = getEntryById(id || "");
+
+  if (!entry) {
+    return (
+      <div className="p-8">
+        <p className="text-muted-foreground">Entry not found.</p>
+        <Link to="/journal" className="text-primary hover:underline mt-4 inline-block">Back to journal</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 max-w-4xl">
@@ -55,8 +68,8 @@ const EntryDetailPage = () => {
 
         <div className="mb-8 p-6 rounded-lg bg-card border border-border">
           <p className="text-foreground/80 leading-relaxed">{entry.preview}</p>
-          <p className="text-foreground/60 leading-relaxed mt-4">
-            This is a preview of the encrypted entry content. In the full application, the complete text would be decrypted and displayed here with full formatting support.
+          <p className="text-foreground/60 leading-relaxed mt-4 text-xs italic">
+            Note: This application currently stores entry previews in local storage. In a full implementation, the complete encrypted text would be stored and decrypted here.
           </p>
         </div>
 

@@ -1,7 +1,8 @@
 import { Outlet } from "react-router-dom";
-import AppSidebar from "./AppSlidebar";
+import AppSidebar from "./AppSidebar";
 
 const AppLayout = () => {
+
   return (
     <div className="grain-overlay min-h-screen">
       <AppSidebar />
